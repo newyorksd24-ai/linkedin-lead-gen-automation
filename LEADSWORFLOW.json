@@ -1,0 +1,376 @@
+{
+  "name": "PRIMOWORFLOW-APPRENDIMENTO",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "75961468-c42b-4626-9030-842f844680fa",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -384,
+        -32
+      ],
+      "id": "5f2f5edc-0ac4-47c8-9796-e68d8351c404",
+      "name": "Webhook",
+      "webhookId": "75961468-c42b-4626-9030-842f844680fa"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "65c6eba6-5137-489f-9e6a-93bb43d448ad",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "@concorrente.com",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "0f798eca-1591-4a21-9cad-d54f4e625c92",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "null",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        496,
+        -32
+      ],
+      "id": "ed3254a6-921a-4569-9705-f1c9f3e88aa8",
+      "name": "Filtro Concorrenti."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ef32ebe2-8ac0-4102-bb2c-296065a087bf",
+              "leftValue": "={{ $json.budget }}",
+              "rightValue": 1000,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "fb1ad3e1-cc3d-48d0-926b-c7d17a00ce5d",
+              "leftValue": "={{ $json.settore }}",
+              "rightValue": "IT",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        832,
+        -16
+      ],
+      "id": "c1e1a56b-deb4-498f-9f52-1e4aea6bd0ca",
+      "name": "Verifica VIP"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "174cY2AiaiRQBSM-n3CXLho84xEpbHvnz2agqkSu6uek",
+          "mode": "list",
+          "cachedResultName": "Lead-VIP",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/174cY2AiaiRQBSM-n3CXLho84xEpbHvnz2agqkSu6uek/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/174cY2AiaiRQBSM-n3CXLho84xEpbHvnz2agqkSu6uek/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nome": "={{ $json.nome }}",
+            "Email": "={{ $json.email }}",
+            "Budget": "={{ $json.budget }}",
+            "Settore": "={{ $json.settore }}"
+          },
+          "matchingColumns": [
+            "Nome"
+          ],
+          "schema": [
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Settore",
+              "displayName": "Settore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1152,
+        -32
+      ],
+      "id": "19a14ea7-7d1f-415f-92c6-088c90ec66c8",
+      "name": "LISTA-CLIENTI-VIP",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5659920-57a7-4fc8-9ffa-d8a837d72b11",
+              "name": "=nome",
+              "value": "={{ $json.nome.toTitleCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "906e0724-6197-42e2-b8fa-0a6ce76012c3",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "f3083c62-5291-4e87-b1a3-4e75b84916e1",
+              "name": "settore",
+              "value": "={{ $json.settore }}",
+              "type": "string"
+            },
+            {
+              "id": "266b1ada-e1ee-45a1-8173-ca3cd3dcd27e",
+              "name": "budget",
+              "value": "={{ $json.budget }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        -32
+      ],
+      "id": "d0e6356d-fb0e-460d-b3cc-ab13457c9c0b",
+      "name": "PULIZIA-DEI-DATI"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "45ac8e6f-adc5-40c9-8722-e328460cdd0e",
+              "leftValue": "={{ typeof $json.budget }}",
+              "rightValue": "==== 'number'",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "5d20f885-4b47-49af-918e-3a146cbe17b3",
+              "leftValue": "={{ $json.budget }}",
+              "rightValue": 1000,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        272,
+        -32
+      ],
+      "id": "70feb7d6-1170-47d1-96a6-87318ca9fca4",
+      "name": "Filter",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "=body",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -32
+      ],
+      "id": "99360225-4023-4332-991f-dd72b3c2c6b5",
+      "name": "Split Out"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro Concorrenti.": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Verifica VIP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifica VIP": {
+      "main": [
+        [
+          {
+            "node": "LISTA-CLIENTI-VIP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PULIZIA-DEI-DATI": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Filtro Concorrenti.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "PULIZIA-DEI-DATI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "7d2be83f-108d-445b-ada8-2db91a25987d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c6340a675df2a727ab15ed3f6d8d62880dbe20df9d0152fe8457b488c5c92e1e"
+  },
+  "id": "-IPXyQl6VMWAgSwP_d1hl",
+  "tags": []
+}
