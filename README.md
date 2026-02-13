@@ -3,6 +3,25 @@
 
 ## 📋 Project Overview
 
+## 🔄 Universal Application
+
+**Note:** This system uses bicycle orders as a demonstration, but the logic is **fully adaptable** to any business model:
+
+- 🛍️ **E-commerce:** Any product catalog (clothing, electronics, furniture)
+- 📦 **B2B:** Lead qualification and supplier management
+- 🏠 **Real Estate:** Property inquiry handling and follow-ups
+- 🎓 **Education:** Course enrollment and student onboarding
+- 🍕 **Food Delivery:** Order intake and kitchen management
+- 💼 **Services:** Appointment booking and client management
+
+Simply replace:
+- "Bicycle Models" → Your product/service name
+- "Stock" → Your resource availability
+- "Warehouse" → Your fulfillment system
+
+The **AI validation**, **loop prevention**, and **delayed follow-up** logic remain universal.
+
+
 An end-to-end automated order management system for bicycle e-commerce, built entirely with **n8n workflows**. The system handles order intake, AI-powered data validation, inventory management, customer follow-ups, and automated restocking alerts.
 
 **Key Features:**
