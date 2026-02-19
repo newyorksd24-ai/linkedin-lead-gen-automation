@@ -213,6 +213,8 @@ Send a `POST` request to your WF1 webhook URL with this body:
 - **PENDING_VERIFICATION:** Data looks real but incomplete (missing city/ZIP)
 - **INVALID:** Fake data, test words, phone <9 digits
 
+![WF1 - Order Intake & Validation](W1.png)
+
 -----
 
 ### **WF2 - STALE ORDER CLEANUP**
@@ -240,8 +242,9 @@ Send a `POST` request to your WF1 webhook URL with this body:
 const now = new Date();
 const threshold48h = 48 * 60 * 60 * 1000;
 const elapsed = now - new Date(order.Timestamp);
-const shouldDiscard = elapsed > threshold48h;
-```
+const shouldDiscard = elapsed > ## **WF2 - STALE ORDER CLEANUP**
+
+WF2 - STALE ORDER CLEANUP (W2.png)
 
 -----
 
@@ -277,7 +280,11 @@ const shouldDiscard = elapsed > threshold48h;
 - After 2 failed re-validation attempts, stops auto-retry
 - Team receives alert for manual review
 
------
+### **WF3 - CUSTOMER RESPONSE HANDLER*
+
+![WF3 - Customer Response Handler](W3.png)
+
+----
 
 ### **WF4 - DELAYED ORDERS FOLLOW-UP**
 
@@ -320,6 +327,8 @@ if (stock <= REORDER_POINT) {
   suggestedOrder = TARGET_STOCK - stock;
 }
 ```
+### **WF4 - DELAYED ORDERS FOLLOW-UP**
+![WF4 - Delayed Orders Follow-up](W4.png)
 
 -----
 
