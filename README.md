@@ -242,9 +242,11 @@ Send a `POST` request to your WF1 webhook URL with this body:
 const now = new Date();
 const threshold48h = 48 * 60 * 60 * 1000;
 const elapsed = now - new Date(order.Timestamp);
-const shouldDiscard = elapsed > ## **WF2 - STALE ORDER CLEANUP**
+const shouldDiscard = elapsed > threshold48h;
+```
+### **WF2 - STALE ORDER CLEANUP**
+![WF2 - Stale Order Cleanup](W2.png)
 
-WF2 - STALE ORDER CLEANUP (W2.png)
 
 -----
 
@@ -276,12 +278,11 @@ WF2 - STALE ORDER CLEANUP (W2.png)
 
 **Loop Prevention:**
 
-- Each order starts with `retryCount = 0`
-- After 2 failed re-validation attempts, stops auto-retry
-- Team receives alert for manual review
+* Each order starts with `retryCount = 0`
+* After 2 failed re-validation attempts, stops auto-retry
+* Team receives alert for manual review
 
-### **WF3 - CUSTOMER RESPONSE HANDLER*
-
+### **WF3 - CUSTOMER RESPONSE HANDLER**
 ![WF3 - Customer Response Handler](W3.png)
 
 ----
