@@ -1,0 +1,911 @@
+{
+  "name": "W4_ ORDERS_DELAYED",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -176,
+        -128
+      ],
+      "id": "1f193f39-1c83-48ec-93e8-c2c946110afa",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// W4 - CONFRONTO STOCK + RIORDINO + SBLOCCO DELAYED\n// ============================================\n\nconst delayedOrders = $('LETTURA DB_DELAYED').all();\nconst stockItems = $('LETTURA INVENTARIO_STOCK').all();\n\nif (delayedOrders.length === 0) return [];\n\nconst REORDER_POINT = 5;\nconst TARGET_STOCK = 15;\n\n// Mappa stock\nconst stockMap = {};\nfor (const item of stockItems) {\n  const model = String(item.json['bicycleModel'] || '').trim().toLowerCase();\n  stockMap[model] = {\n    currentStock: parseInt(item.json.stock, 10) || 0,\n    price: item.json.price || ''\n  };\n}\n\nconst results = [];\nconst stillDelayed = {};\n\n// Analisi ordini DELAYED\nfor (const order of delayedOrders) {\n  const model = String(order.json['bicycleModel'] || '').trim().toLowerCase();\n  const qty = parseInt(order.json.quantity, 10) || 0;\n  const stock = stockMap[model] ? stockMap[model].currentStock : 0;\n\n  if (stock >= qty) {\n    const stockAfterUnlock = stock - qty;\n    results.push({\n      json: {\n        type: 'UNLOCK',\n        id: order.json.id,\n        customerName: order.json.customerName,\n        email: order.json.email,\n        phone: order.json.phone,\n        'shippingAddress': order.json['shippingAddress'],\n        'bicycleModel': model,\n        quantity: qty,\n        price: order.json.price,\n        notes: order.json.notes,\n        timestamp: order.json.timestamp,\n        newStatus: 'CONFIRMED',\n        stockAfterUnlock\n      }\n    });\n    stockMap[model].currentStock = stockAfterUnlock;\n  } else {\n    if (!stillDelayed[model]) stillDelayed[model] = { totalNeeded: 0 };\n    stillDelayed[model].totalNeeded += qty;\n  }\n}\n\n// RESTOCK — UN SOLO item per modello, mai duplicati\nconst restockModels = new Set(); // Tiene traccia dei modelli già aggiunti\n\n// Scenario A: modelli con DELAYED bloccati\nfor (const [model, data] of Object.entries(stillDelayed)) {\n  const currentStock = stockMap[model] ? stockMap[model].currentStock : 0;\n  const deficit = data.totalNeeded - currentStock;\n  \n  restockModels.add(model); // Segna come già gestito\n  results.push({\n    json: {\n      type: 'RESTOCK',\n      model,\n      currentStock,\n      neededForDelayed: data.totalNeeded,\n      suggestedOrder: Math.max(deficit, TARGET_STOCK - currentStock, 0),\n      reason: 'DELAYED_ORDERS'\n    }\n  });\n}\n\n// Scenario B: modelli sotto soglia (SOLO se non già in lista)\nfor (const [model, info] of Object.entries(stockMap)) {\n  if (!restockModels.has(model) && info.currentStock <= REORDER_POINT) {\n    results.push({\n      json: {\n        type: 'RESTOCK',\n        model,\n        currentStock: info.currentStock,\n        neededForDelayed: 0,\n        suggestedOrder: Math.max(TARGET_STOCK - info.currentStock, 0),\n        reason: 'LOW_STOCK'\n      }\n    });\n  }\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        -128
+      ],
+      "id": "52432780-2fdd-403e-b1d6-c428629d19db",
+      "name": "CONFRONTO + CALCOLO LISTA RIORDINO"
+    },
+    {
+      "parameters": {
+        "sendTo": "info@magazziniere.com",
+        "subject": "=Riordino Stock - {{ $json.model }} - {{ $json.reason }}",
+        "emailType": "text",
+        "message": "=Richiesta di riordino automatica:  Modello: {{ $json.model }} Stock attuale: {{ $json.currentStock }} Quantità necessaria per ordini in attesa: {{ $json.neededForDelayed }} Quantità suggerita da ordinare: {{ $json.suggestedOrder }} Motivo: {{ $json.reason }}  Richiesta generata automaticamente dal sistema W4.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        944,
+        -224
+      ],
+      "id": "2c1fc868-bf18-444c-b4ca-70c03d112bba",
+      "name": "MESSAGGIO AL MAGAZZINO",
+      "webhookId": "7daa7a40-8863-4338-9963-2642740cb764",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "53D8kOUWF37L6Qfx",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Switch').item.json.email }}",
+        "subject": "subject: \"Ordine #{{ $json.id }} Confermato!\"",
+        "emailType": "text",
+        "message": "=Gentile {{ $('Switch').item.json.customerName }}, il tuo ordine {{ $('Switch').item.json.id }} per {{ $json['bicycleModel'] }} {{ $('Switch').item.json.quantity }} è stato confermato! Consegna stimata: 4-6 giorni lavorativi. Grazie, Bicycle Shop Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        -32
+      ],
+      "id": "2eabd511-fd59-4ad1-a94a-169b57cb9d28",
+      "name": "EMAIL CONFERMA ORDINE AL CLIENTE",
+      "webhookId": "55774d30-1de8-4b16-99c6-d47bc0d83ade",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "53D8kOUWF37L6Qfx",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f9ae16c0-9f4a-412b-8f71-5e86fe2191aa",
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "RESTOCK",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "172c890b-f47f-438c-96dc-5a678f2bd3cb",
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "UNLOCK",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        -128
+      ],
+      "id": "65b00fba-274d-4ed0-9c02-ad80fb077c12",
+      "name": "Switch",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1A_KizJA3bZd7AbQWMON_ap02vlpwBcxxLjAYAkhxSCA",
+          "mode": "list",
+          "cachedResultName": "Orders_DELAYED",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1A_KizJA3bZd7AbQWMON_ap02vlpwBcxxLjAYAkhxSCA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1A_KizJA3bZd7AbQWMON_ap02vlpwBcxxLjAYAkhxSCA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Switch').item.json.id }}",
+            "customerName": "={{ $('Switch').item.json.customerName }}",
+            "email": "={{ $('Switch').item.json.email }}",
+            "shippingAddress": "={{ $('Switch').item.json['shippingAddress'] }}",
+            "phone": "={{ $('Switch').item.json.phone }}",
+            "bicycleModel": "={{ $('Switch').item.json['bicycleModel'] }}",
+            "quantity": "={{ $('Switch').item.json.quantity }}",
+            "price": "={{ $('Switch').item.json.price }}",
+            "notes": "={{ $('Switch').item.json.notes }}",
+            "orderStatus": "={{ $('Switch').item.json.newStatus }}",
+            "timestamp": "={{ $('Switch').item.json.timestamp }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customerName",
+              "displayName": "customerName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "shippingAddress",
+              "displayName": "shippingAddress",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bicycleModel",
+              "displayName": "bicycleModel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "orderStatus",
+              "displayName": "orderStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1168,
+        -32
+      ],
+      "id": "cc86683c-b24c-47cc-a403-a5cd3cbd9991",
+      "name": "AGGIORNAMENTO ORDER_DELAYED",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZX8fvh5b89WdVL1ZyK3EOBHg0svtpRdsAnEP3McqUaM",
+          "mode": "list",
+          "cachedResultName": "WF1_Inventario - Magazzino",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZX8fvh5b89WdVL1ZyK3EOBHg0svtpRdsAnEP3McqUaM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZX8fvh5b89WdVL1ZyK3EOBHg0svtpRdsAnEP3McqUaM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "bicycleModel": "={{ $json['bicycleModel'] }}",
+            "stock": "={{ $json.stockAfterUnlock }}",
+            "orderStatus": "={{ $json.newStatus }}",
+            "lastUpdated": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "bicycleModel"
+          ],
+          "schema": [
+            {
+              "id": "bicycleModel",
+              "displayName": "bicycleModel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "stock",
+              "displayName": "stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "orderStatus",
+              "displayName": "orderStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lastUpdated",
+              "displayName": "lastUpdated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        944,
+        -32
+      ],
+      "id": "49be054b-3a9b-4a70-9282-b424357e21e5",
+      "name": "UPDATED INVENTARIO (DECREMENTO STOCK)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1A_KizJA3bZd7AbQWMON_ap02vlpwBcxxLjAYAkhxSCA",
+          "mode": "list",
+          "cachedResultName": "Orders_DELAYED",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1A_KizJA3bZd7AbQWMON_ap02vlpwBcxxLjAYAkhxSCA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1A_KizJA3bZd7AbQWMON_ap02vlpwBcxxLjAYAkhxSCA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        48,
+        -128
+      ],
+      "id": "df4325c6-7a7e-46ab-a14e-3ee7d5b31c4f",
+      "name": "LETTURA DB_DELAYED",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ZX8fvh5b89WdVL1ZyK3EOBHg0svtpRdsAnEP3McqUaM",
+          "mode": "list",
+          "cachedResultName": "WF1_Inventario - Magazzino",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZX8fvh5b89WdVL1ZyK3EOBHg0svtpRdsAnEP3McqUaM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZX8fvh5b89WdVL1ZyK3EOBHg0svtpRdsAnEP3McqUaM/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        -128
+      ],
+      "id": "195729ec-fd7f-4988-b3ec-9a920892ad49",
+      "name": "LETTURA INVENTARIO_STOCK",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1J8ZR-36FTux6lTkcSJQ0s9BiBBMYPXckkA4kHMs0Kkc",
+          "mode": "list",
+          "cachedResultName": "WF1_Ordini_Mese-Febbraio",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1J8ZR-36FTux6lTkcSJQ0s9BiBBMYPXckkA4kHMs0Kkc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1771101534,
+          "mode": "list",
+          "cachedResultName": "Ordini -Mese-Febbraio",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1J8ZR-36FTux6lTkcSJQ0s9BiBBMYPXckkA4kHMs0Kkc/edit#gid=1771101534"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Switch').item.json.id }}",
+            "customerName": "={{ $('Switch').item.json.customerName }}",
+            "email": "={{ $('Switch').item.json.email }}",
+            "shippingAddress": "={{ $('Switch').item.json['shippingAddress'] }}",
+            "phone": "={{ $('Switch').item.json.phone }}",
+            "price": "={{ $('Switch').item.json.price }}",
+            "quantity": "={{ $('Switch').item.json.quantity }}",
+            "bicycleModel": "={{ $('Switch').item.json['bicycleModel'] }}",
+            "notes": "={{ $('Switch').item.json.notes }}",
+            "timestamp": "={{ $('Switch').item.json.timestamp }}",
+            "orderStatus": "={{ $('Switch').item.json.newStatus }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customerName",
+              "displayName": "customerName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "shippingAddress",
+              "displayName": "shippingAddress",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bicycleModel",
+              "displayName": "bicycleModel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "orderStatus",
+              "displayName": "orderStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stock",
+              "displayName": "stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1392,
+        -32
+      ],
+      "id": "417f2ef2-d856-4bc1-8476-d905325cb890",
+      "name": "AGGIORNAMENTO DB_ORDER_GEN-FEB",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1lPui-xuiKhsQm4zIWSkKR_yamY6guVkPpNBj21vKSeY",
+          "mode": "list",
+          "cachedResultName": "Workflow_analytics Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lPui-xuiKhsQm4zIWSkKR_yamY6guVkPpNBj21vKSeY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lPui-xuiKhsQm4zIWSkKR_yamY6guVkPpNBj21vKSeY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "orderId": "={{ $json.id }}",
+            "customerName": "={{ $('AGGIORNAMENTO DB_ORDER_GEN-FEB').item.json.customerName }}",
+            "bicycleModel": "={{ $('AGGIORNAMENTO DB_ORDER_GEN-FEB').item.json.bicycleModel }}",
+            "quantity": "={{ $('AGGIORNAMENTO DB_ORDER_GEN-FEB').item.json.quantity }}",
+            "price": "={{ $('AGGIORNAMENTO DB_ORDER_GEN-FEB').item.json.price }}",
+            "workflowSource": "WF4",
+            "event": "ORDER_UNLOCKED"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "orderId",
+              "displayName": "orderId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customerName",
+              "displayName": "customerName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bicycleModel",
+              "displayName": "bicycleModel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflowSource",
+              "displayName": "workflowSource",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1840,
+        -32
+      ],
+      "id": "5e6dd7b8-96ee-4305-9aeb-857a9417834e",
+      "name": "AnalyticsLog_BranchUNLOCK",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "LETTURA DB_DELAYED",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CONFRONTO + CALCOLO LISTA RIORDINO": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "MESSAGGIO AL MAGAZZINO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "UPDATED INVENTARIO (DECREMENTO STOCK)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AGGIORNAMENTO ORDER_DELAYED": {
+      "main": [
+        [
+          {
+            "node": "AGGIORNAMENTO DB_ORDER_GEN-FEB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UPDATED INVENTARIO (DECREMENTO STOCK)": {
+      "main": [
+        [
+          {
+            "node": "AGGIORNAMENTO ORDER_DELAYED",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LETTURA DB_DELAYED": {
+      "main": [
+        [
+          {
+            "node": "LETTURA INVENTARIO_STOCK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LETTURA INVENTARIO_STOCK": {
+      "main": [
+        [
+          {
+            "node": "CONFRONTO + CALCOLO LISTA RIORDINO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AGGIORNAMENTO DB_ORDER_GEN-FEB": {
+      "main": [
+        [
+          {
+            "node": "EMAIL CONFERMA ORDINE AL CLIENTE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EMAIL CONFERMA ORDINE AL CLIENTE": {
+      "main": [
+        [
+          {
+            "node": "AnalyticsLog_BranchUNLOCK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "timeSavedPerExecution": 60,
+    "executionTimeout": -1,
+    "errorWorkflow": "NWe9mQKryXUwJoVqta3CU"
+  },
+  "versionId": "385ab67b-3150-4dc7-87c7-2d8f42479a8e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c6340a675df2a727ab15ed3f6d8d62880dbe20df9d0152fe8457b488c5c92e1e"
+  },
+  "id": "aOIxBYkW-eXg5UdF1sdkf",
+  "tags": []
+}

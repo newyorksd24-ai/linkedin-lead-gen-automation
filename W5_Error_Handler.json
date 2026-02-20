@@ -1,0 +1,188 @@
+{
+  "name": "WF5 Error Handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "56a6c28e-0113-46e5-b1b6-ea7398db60a0",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const execution = $json.execution;\nconst workflow = $json.workflow;\n\nreturn [{\n  json: {\n    timestamp: new Date().toISOString(),\n    workflowName: workflow.name || 'Unknown',\n    errorMessage: execution.error.message || 'No message',\n    executionId: execution.id || 'No ID'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "f1ec6858-1855-49ce-962c-5ae5eb3feee7",
+      "name": "execution-workflow error log"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1xWvmxSAQn2_CJm5NNQ3_zo7abWUrOiNKh63EW-BlSMQ",
+          "mode": "list",
+          "cachedResultName": "Append on Error log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xWvmxSAQn2_CJm5NNQ3_zo7abWUrOiNKh63EW-BlSMQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xWvmxSAQn2_CJm5NNQ3_zo7abWUrOiNKh63EW-BlSMQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $json.timestamp }}",
+            "workflowName": "={{ $json.workflowName }}",
+            "errorMessage": "={{ $json.errorMessage }}",
+            "executionId": "={{ $json.executionId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflowName",
+              "displayName": "workflowName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "errorMessage",
+              "displayName": "errorMessage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        0
+      ],
+      "id": "763df6c9-9cf6-48ad-9f1a-b8e7466865dd",
+      "name": "Error log DB",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "movoaitalia@gmail.com",
+        "subject": "=⚠️ Errore in {{ $json.workflowName }}",
+        "emailType": "text",
+        "message": "=Workflow: {{ $json.workflowName }}\nErrore: {{ $json.errorMessage }}\nExecution ID: {{ $json.executionId }}\nTimestamp: {{ $json.timestamp }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "ebe91f2e-5abe-4d99-999f-b1f3dc679833",
+      "name": "send email to suppport_team",
+      "webhookId": "b2ad9e54-32f7-4c1c-8be0-c0e7410f2f56",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "53D8kOUWF37L6Qfx",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "execution-workflow error log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "execution-workflow error log": {
+      "main": [
+        [
+          {
+            "node": "Error log DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error log DB": {
+      "main": [
+        [
+          {
+            "node": "send email to suppport_team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "dynamic",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "NWe9mQKryXUwJoVqta3CU"
+  },
+  "versionId": "8dfcb78b-4788-4599-b00f-82c582c38acf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c6340a675df2a727ab15ed3f6d8d62880dbe20df9d0152fe8457b488c5c92e1e"
+  },
+  "id": "NWe9mQKryXUwJoVqta3CU",
+  "tags": []
+}

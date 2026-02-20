@@ -1,0 +1,705 @@
+{
+  "name": "WF3_Order_Processing.",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1KmduRcQ9yJSoW2HMfEkhGjlBMYCMqin7esWOO8ASZ9g",
+          "mode": "list",
+          "cachedResultName": "WF1_WF2_Manual_verification_client DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KmduRcQ9yJSoW2HMfEkhGjlBMYCMqin7esWOO8ASZ9g/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KmduRcQ9yJSoW2HMfEkhGjlBMYCMqin7esWOO8ASZ9g/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "customerName": "={{ $json.customerName }}",
+            "phone": "={{ $('lettura manual DB per java').item.json.phone }}",
+            "orderStatus": "VALID",
+            "bicycleModel": "={{ $json['bicycleModel'] }}",
+            "notes": "={{ $json.notes }}",
+            "timestamp": "={{ $json.timestamp }}",
+            "validatedAt": "={{ $('CLIEND ID... RESPONSE - TRIGGER').item.json.date }}",
+            "quantity": "={{ $json.quantity }}",
+            "shippingAddress": "={{ $json['shippingAddress'] }}",
+            "email": "={{ $('lettura manual DB per java').item.json.email }}",
+            "price": "={{ $json.price }}",
+            "retryCount": "={{ $json.retryCount }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customerName",
+              "displayName": "customerName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "shippingAddress",
+              "displayName": "shippingAddress",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "bicycleModel",
+              "displayName": "bicycleModel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "orderStatus",
+              "displayName": "orderStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "validatedAt",
+              "displayName": "validatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "retryCount",
+              "displayName": "retryCount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1760,
+        672
+      ],
+      "id": "170774d4-dc91-467a-8ef2-dabb1f8b63fb",
+      "name": "UPDATED STATUS MANUAL-VERIFICATION DB ORDERSTATUS: PENDING_VERIFICATION > UPDATED_BY_CLIENT",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "includeDrafts": false,
+          "q": "=Subject:\"Order #\""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        688
+      ],
+      "id": "f5b90cb0-71bc-45a3-b349-75673b10904b",
+      "name": "CLIEND ID... RESPONSE - TRIGGER",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "53D8kOUWF37L6Qfx",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=SUBJECT: {{ $json.subject }}\nBODY: {{ $json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a Data Extraction Expert.  Your task is to extract specific information from a customer's email reply regarding their bicycle order.  RULES: - \"Extract the full Order ID from the Subject line. It starts with 'ORD-' and includes all dashes and numbers (e.g., ORD-123456789-000). Do not strip any characters. - Extract any corrected email, phone, or shippingAddress mentioned in the Body. - If a piece of information is NOT mentioned, return \"null\" for that field. - Respond ONLY with a valid JSON object.  OUTPUT FORMAT: {   \"orderId\": \"string\",   \"email\": \"string or null\",   \"phone\": \"string or null\",   \"shippingAddress\": \"string or null\" }"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        512,
+        688
+      ],
+      "id": "97b1d5de-d946-480c-a105-1f6da9c08c7a",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        880
+      ],
+      "id": "b673db81-4d1e-432d-a49d-c67331135bc6",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "Z2zT01QqgRlndMbx",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "aa8f336f-e6b1-4b58-bd64-a05a111498ca",
+              "leftValue": "={{ $json.email != null || $json.phone != null || $json.shippingAddress != null }}",
+              "rightValue": "null",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1536,
+        688
+      ],
+      "id": "04657023-f620-4ca0-ae63-862c6c21281f",
+      "name": "LLM ha trovato davvero dati nuovi?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prende il testo dall'AI\nconst rawText = $json.text;\n\n// Rimuove i tag markdown con regex sicura\nconst cleanJson = rawText\n  .replace(/```json/g, '')\n  .replace(/```/g, '')\n  .trim();\n\n// Converte in oggetto\nconst parsed = JSON.parse(cleanJson);\n\n// Fix orderId\nif (parsed.orderId) {\n  parsed.orderId = String(parsed.orderId).trim();\n}\n\nreturn [{ json: parsed }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        688
+      ],
+      "id": "5a63a849-0c2b-4415-8127-e27ccc71b13f",
+      "name": "Parse AI Response"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1KmduRcQ9yJSoW2HMfEkhGjlBMYCMqin7esWOO8ASZ9g",
+          "mode": "list",
+          "cachedResultName": "WF1_WF2_Manual_verification_client DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KmduRcQ9yJSoW2HMfEkhGjlBMYCMqin7esWOO8ASZ9g/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KmduRcQ9yJSoW2HMfEkhGjlBMYCMqin7esWOO8ASZ9g/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1088,
+        688
+      ],
+      "id": "b36343f4-a2c0-4f2a-b31f-ffa1c25bc7ae",
+      "name": "lettura Manual DB per java",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Dati estratti dall'AI\nconst aiData = $('Parse AI Response').item.json;\n\n// 2. Dati dal Database\n// IMPORTANTE: Questo deve essere il nome del NODO, non del foglio.\nconst dbNode = $('lettura Manual DB per java');\n\nif (!dbNode || !dbNode.item) {\n  throw new Error(\"Il nodo di lettura non ha prodotto dati. Controlla il filtro ID.\");\n}\n\nconst dbData = dbNode.item.json;\n\n// 3. Unione dati\nreturn {\n  id: dbData.id, // Stringa ORD-1770399228846-695\n  customerName: dbData.customerName,\n  email: (aiData.email && aiData.email !== \"null\") ? aiData.email : dbData.email,\n  phone: (aiData.phone && aiData.phone !== \"null\") ? aiData.phone : dbData.phone,\n  ['shippingAddress']: (aiData.shippingAddress && aiData.shippingAddress !== \"null\") ? aiData.shippingAddress : dbData['shippingAddress'],\n  orderStatus: 'UPDATED_BY_CLIENT', \n  ['bicycleModel']: dbData['bicycleModel'],\n  quantity: dbData.quantity,\n  price: dbData.price,\n  notes: dbData.notes,\n  timestamp: dbData.timestamp,\n  retryCount: (parseInt(dbData.retryCount) || 0) + 1\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        688
+      ],
+      "id": "132e058b-773b-461b-a377-9e0dca824268",
+      "name": "lettura manual DB per java"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ae16c87f-39c7-4b39-8389-ca0b005db8de",
+              "leftValue": "={{ $('lettura manual DB per java').item.json.retryCount }}\n",
+              "rightValue": 2,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1984,
+        672
+      ],
+      "id": "3cd23c6d-4534-472f-a41b-c6c3acd01842",
+      "name": "PREVENT-HTTP- LOOPS"
+    },
+    {
+      "parameters": {
+        "sendTo": "fabiodropshipping22@gmail.com",
+        "subject": "=\"Ordine #{{ $json.id }} richiede intervento manuale\"",
+        "emailType": "text",
+        "message": "=L'ordine #{{ $json.id }} del cliente {{ $json.customerName }} ha superato i 2 tentativi automatici. Verifica manualmente i dati.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2208,
+        784
+      ],
+      "id": "de13a363-34f4-412d-8c38-b408e10d4342",
+      "name": "email --> WH :Verifica manualmente i dati",
+      "webhookId": "03b071f8-53fa-46ad-a6d5-12d5f4dc8c19",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "53D8kOUWF37L6Qfx",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://fabiomoretti.app.n8n.cloud/webhook-test/e177a163-f661-4781-8307-c35e4f823c6d",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "=customerName",
+              "value": "={{ $json.customerName }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            },
+            {
+              "name": "phone",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "shippingAddress",
+              "value": "={{ $('lettura manual DB per java').item.json['shippingAddress'] }}"
+            },
+            {
+              "name": "orderStatus",
+              "value": "={{ $json.orderStatus }}"
+            },
+            {
+              "name": "bicycleModel",
+              "value": "={{ $json['bicycleModel'] }}"
+            },
+            {
+              "name": "quantity",
+              "value": "={{ $json.quantity }}"
+            },
+            {
+              "name": "notes",
+              "value": "={{ $json.notes }}"
+            },
+            {
+              "name": "TimeStamp",
+              "value": "={{ $json.timestamp }}"
+            },
+            {
+              "name": "validatedAt",
+              "value": "={{ $json.validatedAt }}"
+            },
+            {
+              "name": "price",
+              "value": "={{ $('lettura manual DB per java').item.json.price }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2208,
+        592
+      ],
+      "id": "3481eaa1-bc46-41ef-8db8-b54d5b91a79c",
+      "name": "HTTP TO WEBHOOK FOR DOUBLE CHECK",
+      "alwaysOutputData": false,
+      "retryOnFail": false
+    }
+  ],
+  "pinData": {
+    "CLIEND ID... RESPONSE - TRIGGER": [
+      {
+        "json": {
+          "id": "19c77d58c661c091",
+          "threadId": "19c77d471c605cf1",
+          "labelIds": [
+            "UNREAD",
+            "INBOX"
+          ],
+          "sizeEstimate": 9507,
+          "headers": {
+            "delivered-to": "Delivered-To: fabiodropshipping22@gmail.com",
+            "received": "Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])\r\n        by mx.google.com with SMTPS id d9443c01a7336-2ad177ee781sor72248485ad.7.2026.02.19.13.36.49\r\n        for <fabiodropshipping22@gmail.com>\r\n        (Google Transport Security);\r\n        Thu, 19 Feb 2026 13:36:49 -0800 (PST)",
+            "x-received": "X-Received: by 2002:a17:90b:50c6:b0:354:9bc2:8821 with SMTP id\r\n 98e67ed59e1d1-35844fc80e0mr14891511a91.30.1771537008943; Thu, 19 Feb 2026\r\n 13:36:48 -0800 (PST)",
+            "arc-seal": "ARC-Seal: i=1; a=rsa-sha256; t=1771537009; cv=none;\r\n        d=google.com; s=arc-20240605;\r\n        b=hm5IvC7YhZkEh5p28rkg0bCAUSk3Y5umKfWkHgK+t0tvdughiyACW38Ba52qNO4hkd\r\n         hLkgPqu4NHEVDkxIdFKkz7FqoRZlTzjxWo0gCYYSrexz4XXDR0RqnmCW9zabP7zwQP5u\r\n         MTOkl98llVUVinHzl3OOyyiW/CptPrOpbrXNGY/RRiUM4F4oI/yIl88S5avmAfrP3+LG\r\n         2LveT/r4nILm+FK5CkfTUOj0TpdzRSqEFG0HFxuGwNIQPER0ESwJGQP90rUU+UNw09iQ\r\n         fGlKENMXqGJ56FYqs8bz/Fyg7uq6Y7/RJqDc9fSGtZU5sDUwNfUUOENKAO7r1YS1oDwF\r\n         GmGw==",
+            "arc-message-signature": "ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;\r\n        h=to:subject:message-id:date:from:in-reply-to:references:mime-version\r\n         :dkim-signature;\r\n        bh=XcsFkJxiAJWwIQvoFJE5aWbq4cCS8TNsXImuHe+PACA=;\r\n        fh=iCMMTGqsCm8RO7Z2EgUjciXollI9pwSY5PbFltni+iU=;\r\n        b=ZotEiyRtdSbbnCK9/IvnXs7Sfy6wTi1iD/ayKZqtK2yt87prY38vgxx+kq2uB7aTYj\r\n         G6hB/BrGUHlbRR/lPecjCGPjM8TmzsmmWBpuwQE86VPvHaSRZcU0MTboQIRn48XpRQTA\r\n         snDS5zogu2L0bQsPXhwXNOXeMTvACu4QkHmqydu48HpemTx2zrS1k7APiLy57v6C0F4B\r\n         3QPAtbWD2JjD8TSF7re0UYtI8taGOqWQV6CmtSZRIrTksoChIY0BZFh3FslPBGxthhDO\r\n         kM+74jcnXarfPDo/1FPlYn8lGVRDXSVyGsLmAoK1XiEWdaBP780ROi2u2TmVEUL3sck5\r\n         fEdQ==;\r\n        dara=google.com",
+            "arc-authentication-results": "ARC-Authentication-Results: i=1; mx.google.com; arc=none",
+            "return-path": "Return-Path: <movoaitalia@gmail.com>",
+            "received-spf": "Received-SPF: pass (google.com: domain of movoaitalia@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;",
+            "authentication-results": "Authentication-Results: mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20230601 header.b=XvViUeag;\r\n       arc=pass (i=1);\r\n       spf=pass (google.com: domain of movoaitalia@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=movoaitalia@gmail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=pass header.i=@gmail.com",
+            "dkim-signature": "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=gmail.com; s=20230601; t=1771537009; x=1772141809; dara=google.com;\r\n        h=to:subject:message-id:date:from:in-reply-to:references:mime-version\r\n         :from:to:cc:subject:date:message-id:reply-to;\r\n        bh=XcsFkJxiAJWwIQvoFJE5aWbq4cCS8TNsXImuHe+PACA=;\r\n        b=XvViUeagUGtsa16krJeK4FobCWBlvWihwtK9xRFjhT/oXkTQSPzBczeYetICbXLfRM\r\n         nUgm9qHQ9GyM2H3X6QdVsInF6qqjxiqWXL8Zn5jDsTNR5+aWUaj+hZnv9lPD6gBxvt1E\r\n         7c9rvja0wirJ2PlBFq+sROdZhxc5jyngMbYgtqe0uw3BjLsxeHNIC6Zu2UVC+zgt8qag\r\n         EREPox0pHKIxXii2eraRNrMv7zfKz8d3EEYvHPKDsaKgOWP+vCWQze5En5pUpdVtM5AV\r\n         lbt6dTwOrdlSpsKPY+SbsU3QFTrMSsDbD9+1lKHLA+srh53XNi+i/Ju+nl1Zni1uCsD8\r\n         DZsQ==",
+            "x-google-dkim-signature": "X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=1e100.net; s=20230601; t=1771537009; x=1772141809;\r\n        h=to:subject:message-id:date:from:in-reply-to:references:mime-version\r\n         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id\r\n         :reply-to;\r\n        bh=XcsFkJxiAJWwIQvoFJE5aWbq4cCS8TNsXImuHe+PACA=;\r\n        b=xFwGByzPamRTURhMVMuv8c3Sb/wZ/SvBpySLs4FGlV7aq8azhuy7g0QJupGGsJLGEG\r\n         Rlb66l/G2dy6l3k6SxkqT2Y0vexGG6xZ4uYzVv88DjM56Pi87Gmk0a/YkyTv3pqQtvM7\r\n         Ljhr3E++zI9FwheJfH24FVh7C3SgjPE27sz+5rO+2VS6GOQCWnI5s/AixQKh3jc7OBhL\r\n         xKNb2er4uud04uvxGuNYGgIwD3gGzWx1PWb0qTf3osj93TMC4UxxLhWgYkdYdUZWwTOB\r\n         IqUI99FFlnmngIMQ5F2B3mXMpjSgGxvkmMW+ctIyLf0LAMWw8OBp2gEVeemffX6IENBt\r\n         iHag==",
+            "x-gm-message-state": "X-Gm-Message-State: AOJu0YzFe1dr2kMBv7uRZtiMnrq78nO2yHxdkmLY5sSO73lGpdOuS+B0\r\n\tBVJYmGbVygGxTJH/xTpDB6Xu+EB3e+MDw8iMUDIzpqP/iZ7YRQ6MCldvMhTJ9O0g26HUpGbMeC0\r\n\tXVnd7AgRksjeYMmh6dykFF9BjyrGOUrVxmA==",
+            "x-gm-gg": "X-Gm-Gg: AZuq6aI2vfAhJyyAuhvrxyat9i5hn2k33UCEKiEP/FOeG3eQ9AITwPI1I7D60B8bNqT\r\n\t5DObx1AYtlNarsl+maiby4bh5ART/rP3zft4lSVDNgB2j6rLQ+MMw9vuSC2SbtE0wjitq0odzFI\r\n\tJ5nm0xRS5RTFdIkr5QQFxCCVS0bNUzeUKx0Kyv6/gspbLxp0b58Cqs7MFNE+oWuk0Aq5asPpz2I\r\n\tbXJut0qa7vlsWPmGE5K0vmkieaqFzkREMMOm2mKczUE4NaSZrgJjaYflwkHdgy2J8QnUTS1HGe/\r\n\tzPkjTi0=",
+            "mime-version": "MIME-Version: 1.0",
+            "references": "References: <CADWEzH2OezSWe2UBtcuM84h5gTaJjUjaFDa-8ODzU-GfMT6A8A@mail.gmail.com>",
+            "in-reply-to": "In-Reply-To: <CADWEzH2OezSWe2UBtcuM84h5gTaJjUjaFDa-8ODzU-GfMT6A8A@mail.gmail.com>",
+            "from": "From: Fabio <movoaitalia@gmail.com>",
+            "date": "Date: Thu, 19 Feb 2026 22:36:37 +0100",
+            "x-gm-features": "X-Gm-Features: AaiRm51jXk6WHX91_0FztAc0Ofy24hCsm1oPTQp_opZrnwLc4vy0UPY9yFkBUQs",
+            "message-id": "Message-ID: <CAKkU-AFLxNBOMQXGP_sRuNE-LETXGgmnSHrc2O13jf2nhJm3ag@mail.gmail.com>",
+            "subject": "Subject: Re: Subject: Order #ORD-1770399228846-695 - We need more information",
+            "to": "To: fabiodropshipping22@gmail.com",
+            "content-type": "Content-Type: multipart/alternative; boundary=\"0000000000001fe659064b341a70\""
+          },
+          "html": "<div dir=\"auto\">The number is not correct </div><div dir=\"auto\"><br></div><div dir=\"auto\">Number is 333678912</div><div><br><div class=\"gmail_quote gmail_quote_container\"><div dir=\"ltr\" class=\"gmail_attr\">Il giorno gio 19 feb 2026 alle 22:35 &lt;<a href=\"mailto:fabiodropshipping22@gmail.com\">fabiodropshipping22@gmail.com</a>&gt; ha scritto:<br></div><blockquote class=\"gmail_quote\" style=\"margin:0px 0px 0px 0.8ex;border-left-width:1px;border-left-style:solid;padding-left:1ex;border-left-color:rgb(204,204,204)\">Dear Anna bianchi,<br>\n<br>\nWe have detected some issues with your order #ORD-1770399228846-695<br>\nDue to invalid data, we need a little more information from you to<br>\nproceed with your order for Road Bike.<br>\n<br>\nPlease reply to this email with:<br>\n- Your correct email address: <a href=\"mailto:movoaitalia@gmail.com\" target=\"_blank\">movoaitalia@gmail.com</a><br>\n- Your correct phone number  3335<br>\n- Your correct Shipping address: Piazza Duomo 1, 50122 Firenze, Italia<br>\n(if this is wrong, please provide the correct one)<br>\n<br>\nWe will process your order as soon as we receive the updated information.<br>\n<br>\nThank you!<br>\nBest regards,<br>\nBicycle Shop Team<br>\n<br>\n---<br>\nThis email was sent automatically with n8n<br>\n<a href=\"https://n8n.io\" rel=\"noreferrer\" target=\"_blank\">https://n8n.io</a><br>\n</blockquote></div></div>\n",
+          "text": "The number is not correct\n\nNumber is 333678912\n\nIl giorno gio 19 feb 2026 alle 22:35 <fabiodropshipping22@gmail.com> ha\nscritto:\n\n> Dear Anna bianchi,\n>\n> We have detected some issues with your order #ORD-1770399228846-695\n> Due to invalid data, we need a little more information from you to\n> proceed with your order for Road Bike.\n>\n> Please reply to this email with:\n> - Your correct email address: movoaitalia@gmail.com\n> - Your correct phone number  3335\n> - Your correct Shipping address: Piazza Duomo 1, 50122 Firenze, Italia\n> (if this is wrong, please provide the correct one)\n>\n> We will process your order as soon as we receive the updated information.\n>\n> Thank you!\n> Best regards,\n> Bicycle Shop Team\n>\n> ---\n> This email was sent automatically with n8n\n> https://n8n.io\n>\n",
+          "textAsHtml": "<p>The number is not correct</p><p>Number is 333678912</p><p>Il giorno gio 19 feb 2026 alle 22:35 &lt;<a href=\"mailto:fabiodropshipping22@gmail.com\">fabiodropshipping22@gmail.com</a>&gt; ha<br/>scritto:</p><p>&gt; Dear Anna bianchi,<br/>&gt;<br/>&gt; We have detected some issues with your order #ORD-1770399228846-695<br/>&gt; Due to invalid data, we need a little more information from you to<br/>&gt; proceed with your order for Road Bike.<br/>&gt;<br/>&gt; Please reply to this email with:<br/>&gt; - Your correct email address: <a href=\"mailto:movoaitalia@gmail.com\">movoaitalia@gmail.com</a><br/>&gt; - Your correct phone number  3335<br/>&gt; - Your correct Shipping address: Piazza Duomo 1, 50122 Firenze, Italia<br/>&gt; (if this is wrong, please provide the correct one)<br/>&gt;<br/>&gt; We will process your order as soon as we receive the updated information.<br/>&gt;<br/>&gt; Thank you!<br/>&gt; Best regards,<br/>&gt; Bicycle Shop Team<br/>&gt;<br/>&gt; ---<br/>&gt; This email was sent automatically with n8n<br/>&gt; <a href=\"https://n8n.io\">https://n8n.io</a><br/>&gt;</p>",
+          "subject": "Re: Subject: Order #ORD-1770399228846-695 - We need more information",
+          "references": "<CADWEzH2OezSWe2UBtcuM84h5gTaJjUjaFDa-8ODzU-GfMT6A8A@mail.gmail.com>",
+          "date": "2026-02-19T21:36:37.000Z",
+          "to": {
+            "value": [
+              {
+                "address": "fabiodropshipping22@gmail.com",
+                "name": ""
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><a href=\"mailto:fabiodropshipping22@gmail.com\" class=\"mp_address_email\">fabiodropshipping22@gmail.com</a></span>",
+            "text": "fabiodropshipping22@gmail.com"
+          },
+          "from": {
+            "value": [
+              {
+                "address": "movoaitalia@gmail.com",
+                "name": "Fabio"
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Fabio</span> &lt;<a href=\"mailto:movoaitalia@gmail.com\" class=\"mp_address_email\">movoaitalia@gmail.com</a>&gt;</span>",
+            "text": "\"Fabio\" <movoaitalia@gmail.com>"
+          },
+          "messageId": "<CAKkU-AFLxNBOMQXGP_sRuNE-LETXGgmnSHrc2O13jf2nhJm3ag@mail.gmail.com>",
+          "inReplyTo": "<CADWEzH2OezSWe2UBtcuM84h5gTaJjUjaFDa-8ODzU-GfMT6A8A@mail.gmail.com>"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "UPDATED STATUS MANUAL-VERIFICATION DB ORDERSTATUS: PENDING_VERIFICATION > UPDATED_BY_CLIENT": {
+      "main": [
+        [
+          {
+            "node": "PREVENT-HTTP- LOOPS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CLIEND ID... RESPONSE - TRIGGER": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM ha trovato davvero dati nuovi?": {
+      "main": [
+        [
+          {
+            "node": "UPDATED STATUS MANUAL-VERIFICATION DB ORDERSTATUS: PENDING_VERIFICATION > UPDATED_BY_CLIENT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "lettura Manual DB per java",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lettura Manual DB per java": {
+      "main": [
+        [
+          {
+            "node": "lettura manual DB per java",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lettura manual DB per java": {
+      "main": [
+        [
+          {
+            "node": "LLM ha trovato davvero dati nuovi?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PREVENT-HTTP- LOOPS": {
+      "main": [
+        [
+          {
+            "node": "HTTP TO WEBHOOK FOR DOUBLE CHECK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "email --> WH :Verifica manualmente i dati",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "any",
+    "timeSavedPerExecution": 60,
+    "executionTimeout": -1,
+    "errorWorkflow": "NWe9mQKryXUwJoVqta3CU"
+  },
+  "versionId": "44bb2778-a48a-4c5d-9717-fb59af0acfb7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c6340a675df2a727ab15ed3f6d8d62880dbe20df9d0152fe8457b488c5c92e1e"
+  },
+  "id": "66h_lRtI5AzGGktQlktuN",
+  "tags": []
+}

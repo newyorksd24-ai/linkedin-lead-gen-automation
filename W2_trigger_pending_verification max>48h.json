@@ -1,0 +1,499 @@
+{
+  "name": "W2_GeneratedLeads_Bicycle",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1KmduRcQ9yJSoW2HMfEkhGjlBMYCMqin7esWOO8ASZ9g",
+          "mode": "list",
+          "cachedResultName": "Manual verification client DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KmduRcQ9yJSoW2HMfEkhGjlBMYCMqin7esWOO8ASZ9g/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KmduRcQ9yJSoW2HMfEkhGjlBMYCMqin7esWOO8ASZ9g/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "orderStatus",
+              "lookupValue": "PENDING_VERIFICATION"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1440,
+        720
+      ],
+      "id": "0f7be5d2-9f9d-4b03-ad70-1ab265c6fa67",
+      "name": "LETTURA DB OGNI 6 ORE (STATUS)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Prendi tutti gli ordini dal nodo precedente\nconst items = $input.all();\n\n// ⚠️ NUOVO: Gestisci caso DB vuoto\nif (items.length === 0) {\n  console.log(\"Nessun ordine PENDING_VERIFICATION trovato. Workflow terminato.\");\n  return [];  // Ritorna array vuoto, workflow si ferma senza errori\n}\n\n// 2. Prendi l'ora attuale\nconst now = new Date();\n\n// 3. Definisci la soglia: 48 ore in millisecondi\nconst threshold48h = 48 * 60 * 60 * 1000;\n\n// 4. Per ogni ordine, calcola il tempo trascorso\nconst processedItems = items.map(item => {\n  const timestampString = item.json.timestamp;\n  const createdAt = new Date(timestampString);\n  const elapsed = now - createdAt;\n  const hoursElapsed = elapsed / (60 * 60 * 1000);\n  const shouldDiscard = elapsed > threshold48h;\n  \n  return {\n    json: {\n      ...item.json,\n      hoursElapsed: Math.round(hoursElapsed),\n      shouldDiscard: shouldDiscard\n    }\n  };\n});\n\n// 5. Ritorna tutti gli items processati\nreturn processedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        720
+      ],
+      "id": "636e802e-99d7-49a4-8872-870d1bf2d343",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b6ad8b5b-6f34-4f60-9244-aa964cc57d7d",
+              "leftValue": "={{ $json.shouldDiscard }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1888,
+        720
+      ],
+      "id": "6c1cac42-1de1-4538-9486-4f0f4a8f5add",
+      "name": "IF: shouldDiscard (>48h)"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1p2g-_Fo1Gz-QJAo7LtV3KVw_IhxXrK0eRfBjY8VY2-c",
+          "mode": "list",
+          "cachedResultName": "WF2_DB _ARCHIVE/ NO_SHOW_UP ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1p2g-_Fo1Gz-QJAo7LtV3KVw_IhxXrK0eRfBjY8VY2-c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1p2g-_Fo1Gz-QJAo7LtV3KVw_IhxXrK0eRfBjY8VY2-c/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "customerName": "={{ $json.customerName }}",
+            "phone": "={{ $json.phone }}",
+            "email": "={{ $json.email }}",
+            "shippingAddress": "={{ $json['shippingAddress'] }}",
+            "id": "={{ $json.id }}",
+            "orderStatus": "={{ $json.orderStatus }}",
+            "timestamp": "={{ $json.timestamp }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customerName",
+              "displayName": "customerName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "shippingAddress",
+              "displayName": "shippingAddress",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "orderStatus",
+              "displayName": "orderStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "discardedAt ",
+              "displayName": "discardedAt ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2112,
+        736
+      ],
+      "id": "241424b4-455e-48fa-b7e0-9e5989fc7dfa",
+      "name": "WF2_DB_ARCHIVE / NO_SHOW_UP",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        1216,
+        720
+      ],
+      "id": "4e1b4d62-26bb-454c-8f5c-f21a9b6102f2",
+      "name": "TriggerClock every 6h max >48h"
+    },
+    {
+      "parameters": {
+        "sendTo": "fabiodropshipping22@gmail.com",
+        "subject": "={{ $json.id }} NO_SHOW_UP - DISCARDED",
+        "emailType": "text",
+        "message": "hey Team, just to keep you updated about client id..... we couldn't reach them and they not reply, so the order is canceld  and archive. best",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2336,
+        736
+      ],
+      "id": "3fa7321d-fad9-456e-ba0d-ddf779e356cb",
+      "name": "MANDA_EMAIL_ALTEAM",
+      "webhookId": "922cf5d0-310a-40a4-8623-4a793318d40a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "53D8kOUWF37L6Qfx",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1lPui-xuiKhsQm4zIWSkKR_yamY6guVkPpNBj21vKSeY",
+          "mode": "list",
+          "cachedResultName": "Workflow_analytics Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lPui-xuiKhsQm4zIWSkKR_yamY6guVkPpNBj21vKSeY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lPui-xuiKhsQm4zIWSkKR_yamY6guVkPpNBj21vKSeY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "orderId": "={{ $json.id }}",
+            "customerName": "={{ $('WF2_DB_ARCHIVE / NO_SHOW_UP').item.json.customerName }}",
+            "bicycleModel": "={{ $('IF: shouldDiscard (>48h)').item.json.bicycleModel }}",
+            "quantity": "={{ $('IF: shouldDiscard (>48h)').item.json.quantity }}",
+            "price": "={{ $('IF: shouldDiscard (>48h)').item.json.price }}",
+            "event": "ORDER_DISCARDED",
+            "workflowSource": "WF2"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "orderId",
+              "displayName": "orderId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customerName",
+              "displayName": "customerName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bicycleModel",
+              "displayName": "bicycleModel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflowSource",
+              "displayName": "workflowSource",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2560,
+        736
+      ],
+      "id": "9a68089a-050c-4a58-8dec-4c6098ac78c5",
+      "name": "AnalyticsLog_BranchDISCARDED",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "78DXOMq3gmiXam1g",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "TriggerClock every 6h max >48h": [
+      {
+        "json": {
+          "timestamp": "2026-02-19T22:37:24.984+01:00",
+          "Readable date": "February 19th 2026, 10:37:24 pm",
+          "Readable time": "10:37:24 pm",
+          "Day of week": "Thursday",
+          "Year": "2026",
+          "Month": "February",
+          "Day of month": "19",
+          "Hour": "22",
+          "Minute": "37",
+          "Second": "24",
+          "Timezone": "Europe/Rome (UTC+01:00)"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "LETTURA DB OGNI 6 ORE (STATUS)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "IF: shouldDiscard (>48h)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: shouldDiscard (>48h)": {
+      "main": [
+        [],
+        [
+          {
+            "node": "WF2_DB_ARCHIVE / NO_SHOW_UP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TriggerClock every 6h max >48h": {
+      "main": [
+        [
+          {
+            "node": "LETTURA DB OGNI 6 ORE (STATUS)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WF2_DB_ARCHIVE / NO_SHOW_UP": {
+      "main": [
+        [
+          {
+            "node": "MANDA_EMAIL_ALTEAM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MANDA_EMAIL_ALTEAM": {
+      "main": [
+        [
+          {
+            "node": "AnalyticsLog_BranchDISCARDED",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "any",
+    "timeSavedPerExecution": 60,
+    "executionTimeout": -1,
+    "errorWorkflow": "NWe9mQKryXUwJoVqta3CU"
+  },
+  "versionId": "66da2b6d-76b4-4053-863e-3d75cdb29196",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c6340a675df2a727ab15ed3f6d8d62880dbe20df9d0152fe8457b488c5c92e1e"
+  },
+  "id": "rksdcNZd5e8QZ9ykaBwa6",
+  "tags": []
+}
