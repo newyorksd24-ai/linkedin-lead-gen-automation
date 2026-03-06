@@ -1,4 +1,4 @@
-# 🚴 Bicycle Order Management System - n8n Automation
+# n8n-order-management-system
 
 ## 📋 Project Overview
 
